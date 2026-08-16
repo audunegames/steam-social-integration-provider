@@ -17,6 +17,11 @@ namespace Audune.Social.Steam
 
     /// <inheritdoc/>
     public SocialProvider socialProvider => _socialProvider;
+    
+    /// <summary>
+    /// Returns the Steam user ID of the user.
+    /// </summary>
+    public CSteamID userId => _userId;
 
     /// <inheritdoc/>
     public string name {
