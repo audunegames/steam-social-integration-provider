@@ -1,0 +1,18 @@
+{
+  "name": "com.audune.social.stean",
+  "displayName": "Steam Social Integration Provider",
+  "version": "0.1.0",
+  "unity": "2022.3",
+  "description": "Provider for connecting the Steamworks SDK to the social integration.",
+  "licensesUrl": "https://www.gnu.org/licenses/lgpl-3.0.html",
+  "license": "LGPL-3.0-or-later",
+  "author": {
+    "name": "Audune",
+    "email": "support@audune.com",
+    "url": "https://audune.com/"
+  },
+  "dependencies": {
+    "com.audune.social": "0.1.0",
+    "com.rlabrecque.steamworks.net": "20.0.0"
+  }
+}
