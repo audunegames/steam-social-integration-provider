@@ -10,6 +10,7 @@ namespace Audune.Social.Steam
   /// <summary>
   /// Class that defines a social provider for the Steamworks API.
   /// </summary>
+  [AddComponentMenu("Audune/Social/Steam Social Provider")]
   public sealed class SteamSocialProvider : SocialProvider,
     IUserProvider,
     IIRichPresenceProvider,
@@ -25,10 +26,10 @@ namespace Audune.Social.Steam
     
     
     // Variables
-    [SerializeField, Tooltip("The Steam AppID")]
-    private uint _steamAppId = 480;
-    [SerializeField, Tooltip("Whether the Steam client is required to boot the game")]
-    private ExecutionMode _steamClientRequired;
+    [SerializeField, Tooltip("The Steam Application ID")]
+    private uint _steamApplicationId = 480;
+    [SerializeField, Tooltip("When the game will attempt to restart itself through the Steam client using RestartAppIfNecessary")]
+    private ExecutionMode _steamClientRequired = ExecutionMode.BuildOnly;
 
     // Internal state
     private bool _initialized = false;
@@ -38,9 +39,9 @@ namespace Audune.Social.Steam
     private readonly Dictionary<Type, object> _richPresenceAdapters = new Dictionary<Type, object>();
 
     /// <summary>
-    /// Returns the Steam AppID.
+    /// Returns the Steam Application ID.
     /// </summary>
-    internal ulong steamAppId => _steamAppId;
+    public ulong steamApplicationId => _steamApplicationId;
     
     /// <inheritdoc/>
     public override bool isInitialized => _initialized;
@@ -78,7 +79,7 @@ namespace Audune.Social.Steam
           Debug.LogError("[Steam] Could not initialize the Steam client: one or more of the Steamworks binaries seems to be the wrong version", this);
 
         // Check if the Steam client is running
-        if (_steamClientRequired.ShouldExecute() && SteamAPI.RestartAppIfNecessary((AppId_t)_steamAppId))
+        if (_steamClientRequired.ShouldExecute() && SteamAPI.RestartAppIfNecessary((AppId_t)_steamApplicationId))
         {
           Debug.Log("[Steam] Restarting application from the Steam client...", this);
           Application.Quit();
