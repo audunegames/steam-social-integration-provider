@@ -9,7 +9,7 @@ See the [wiki](https://github.com/audunegames/steam-social-integration-provider/
 ## Features
 
 * A social provider component connecting the Steamworks SDK through Steamworks .NET to [Audune Social Integration](https://github.com/audunegames/social-integration).
-* Get the current user for Steam.
+* Get the current user and their relationships for Steam.
 * Set rich presence to Steam.
 * Handle activation of game overlays for Steam.
 

@@ -1,7 +1,7 @@
 {
   "name": "com.audune.social.steam",
   "displayName": "Steam Social Integration Provider",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "unity": "2022.3",
   "description": "Provider for connecting the Steamworks SDK to the social integration.",
   "documentationUrl": "https://github.com/audunegames/steam-social-integration-provider",
@@ -14,7 +14,7 @@
     "url": "https://audune.com/"
   },
   "dependencies": {
-    "com.audune.social": "0.1.0",
+    "com.audune.social": "0.2.0",
     "com.rlabrecque.steamworks.net": "20.0.0"
   }
 }
