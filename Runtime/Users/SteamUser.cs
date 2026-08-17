@@ -81,11 +81,8 @@ namespace Audune.Social.Steam
         if (!_socialProvider.isInitialized)
           return false;
 
-        if (socialProvider is not SteamSocialProvider steamSocialProvider)
-          return false;
-
         return SteamFriends.GetFriendGamePlayed(_userId, out var friendGameInfo)
-          && friendGameInfo.m_gameID == new CGameID(steamSocialProvider.steamApplicationId);
+          && friendGameInfo.m_gameID == new CGameID(_socialProvider.steamApplicationId);
       } 
     }
 
@@ -101,6 +98,32 @@ namespace Audune.Social.Steam
       _userId = userId;
     }
     
+    
+    #region Steam-specific user methods
+    /// <summary>
+    /// Opens the Steam game overlay to the specified user page.
+    /// </summary>
+    /// <param name="type">The type of overlay to open.</param>
+    public void OpenGameOverlayToUser(SteamUserGameOverlayType type)
+    {
+      if (!_socialProvider.isInitialized)
+        return;
+
+      _socialProvider.OpenGameOverlayToUser(type, this);
+    }
+
+    /// <summary>
+    /// Sends a Remote Play Together invite to the user.
+    /// </summary>
+    /// <returns>If the Remote Play Together invide was sent successfully.</returns>
+    public bool SendRemotePlayTogetherInvite()
+    {
+      if (!_socialProvider.isInitialized)
+        return false;
+
+      return SteamRemotePlay.BSendRemotePlayTogetherInvite(_userId);
+    }
+    #endregion
     
     #region User implementation
     /// <inheritdoc/>

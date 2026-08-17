@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using Cysharp.Threading.Tasks;
 using Steamworks;
@@ -164,11 +163,50 @@ namespace Audune.Social.Steam
     }
     #endregion
     
+    #region Opening game overlays
+    /// <summary>
+    /// Open the specified Steam game overlay.
+    /// </summary>
+    /// <param name="type">The type of overlay to open.</param>
+    public void OpenGameOverlay(SteamGameOverlayType type)
+    {
+      if (!isInitialized)
+        return;
+      
+      SteamFriends.ActivateGameOverlay(type.ToActivateGameOverlayString());
+    }
+
+    /// <summary>
+    /// Open the Steam game overlay to the specified user page.
+    /// </summary>
+    /// <param name="type">The type of overlay to open.</param>
+    /// <param name="user">The user whose user page to open.</param>
+    public void OpenGameOverlayToUser(SteamUserGameOverlayType type, SteamUser user)
+    {
+      if (!isInitialized)
+        return;
+      
+      SteamFriends.ActivateGameOverlayToUser(type.ToActivateGameOverlayString(), user.userId);
+    }
+
+    /// <summary>
+    /// Open the Steam game overlay to the web page with the specified URL
+    /// </summary>
+    /// <param name="url">The URL of the web page to open.</param>
+    public void OpenGameOverlayToWebPage(string url)
+    {
+      if (!isInitialized)
+        return;
+      
+      SteamFriends.ActivateGameOverlayToWebPage(url);
+    }
+    #endregion
+    
     #region Relationship provider implementation
     /// <inheritdoc/>
     public UniTask<IUser> GetCurrentUser()
     {
-      // Check if the system is initialized
+      // Check if the client is initialized
       if (!isInitialized)
         return UniTask.FromResult<IUser>(null);
 
@@ -184,7 +222,7 @@ namespace Audune.Social.Steam
       // Create a list to store the relationships
       var relationships = new List<Relationship>();
       
-      // Check if the system is initialized
+      // Check if the client is initialized
       if (!isInitialized)
         return relationships;
 
