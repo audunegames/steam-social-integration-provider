@@ -252,18 +252,8 @@ namespace Audune.Social.Steam
       if (otherUser is not SteamUser otherSteamUser || otherSteamUser.socialProvider != this)
         return UniTask.FromResult(RelationshipType.None);
       
-      // Get the relationship
-      var relationship = SteamFriends.GetFriendRelationship(otherSteamUser.userId);
-      return UniTask.FromResult(relationship switch {
-        EFriendRelationship.k_EFriendRelationshipNone => RelationshipType.None,
-        EFriendRelationship.k_EFriendRelationshipIgnored => RelationshipType.None,
-        EFriendRelationship.k_EFriendRelationshipFriend => RelationshipType.Friend,
-        EFriendRelationship.k_EFriendRelationshipIgnoredFriend => RelationshipType.Friend,
-        EFriendRelationship.k_EFriendRelationshipRequestRecipient => RelationshipType.IncomingFriendRequest,
-        EFriendRelationship.k_EFriendRelationshipRequestInitiator => RelationshipType.OutgoingFriendRequest,
-        EFriendRelationship.k_EFriendRelationshipBlocked => RelationshipType.Blocked,
-        _ => RelationshipType.Unknown,
-      });
+      // Return the relationship type
+      return UniTask.FromResult(SteamFriends.GetFriendRelationship(otherSteamUser.userId).ToRelationshipType());
     }
     #endregion
 

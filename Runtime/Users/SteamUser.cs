@@ -15,14 +15,15 @@ namespace Audune.Social.Steam
     private readonly SteamSocialProvider _socialProvider;
     private readonly CSteamID _userId;
 
-
-    /// <inheritdoc/>
-    public SocialProvider socialProvider => _socialProvider;
     
     /// <summary>
     /// Returns the Steam user ID of the user.
     /// </summary>
     public CSteamID userId => _userId;
+    
+    
+    /// <inheritdoc/>
+    public SocialProvider socialProvider => _socialProvider;
 
     /// <inheritdoc/>
     public string name {
@@ -50,18 +51,8 @@ namespace Audune.Social.Steam
       get {
         if (!_socialProvider.isInitialized)
           return UserStatus.Unknown;
-  
-        var state = SteamFriends.GetFriendPersonaState(_userId);
-        return state switch
-        {
-          EPersonaState.k_EPersonaStateOnline => UserStatus.Online,
-          EPersonaState.k_EPersonaStateLookingToTrade => UserStatus.Online,
-          EPersonaState.k_EPersonaStateLookingToPlay => UserStatus.Online,
-          EPersonaState.k_EPersonaStateAway => UserStatus.Idle,
-          EPersonaState.k_EPersonaStateSnooze => UserStatus.Idle,
-          EPersonaState.k_EPersonaStateBusy => UserStatus.DoNotDisturb,
-          _ => UserStatus.Offline,
-        };
+
+        return SteamFriends.GetFriendPersonaState(_userId).ToUserStatus();
       }
     }
     
@@ -115,7 +106,7 @@ namespace Audune.Social.Steam
     /// <summary>
     /// Sends a Remote Play Together invite to the user.
     /// </summary>
-    /// <returns>If the Remote Play Together invide was sent successfully.</returns>
+    /// <returns>If the Remote Play Together invite was sent successfully.</returns>
     public bool SendRemotePlayTogetherInvite()
     {
       if (!_socialProvider.isInitialized)
