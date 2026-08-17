@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using Cysharp.Threading.Tasks;
 using Steamworks;
@@ -12,7 +13,7 @@ namespace Audune.Social.Steam
   /// </summary>
   [AddComponentMenu("Audune/Social/Steam Social Provider")]
   public sealed class SteamSocialProvider : SocialProvider,
-    IUserProvider,
+    IRelationshipProvider,
     IIRichPresenceProvider,
     IGameOverlayProvider
   {
@@ -163,11 +164,68 @@ namespace Audune.Social.Steam
     }
     #endregion
     
-    #region User provider implementation
+    #region Relationship provider implementation
     /// <inheritdoc/>
     public UniTask<IUser> GetCurrentUser()
     {
-      return UniTask.FromResult<IUser>(new SteamUser(this, Steamworks.SteamUser.GetSteamID()));
+      // Check if the system is initialized
+      if (!isInitialized)
+        return UniTask.FromResult<IUser>(null);
+
+      // Get the current user
+      var currentUserId = Steamworks.SteamUser.GetSteamID();
+      var currentUser = new SteamUser(this, currentUserId);
+      return UniTask.FromResult<IUser>(currentUser);
+    }
+
+    /// <inheritdoc/>
+    public async UniTask<IReadOnlyCollection<Relationship>> GetCurrentUserRelationships()
+    {
+      // Create a list to store the relationships
+      var relationships = new List<Relationship>();
+      
+      // Check if the system is initialized
+      if (!isInitialized)
+        return relationships;
+
+      // Iterate over the Steam friends
+      var friendCount = SteamFriends.GetFriendCount(EFriendFlags.k_EFriendFlagAll);
+      for (var i = 0; i < friendCount; i++)
+      {
+        // Get the friend user
+        var friendUserId = SteamFriends.GetFriendByIndex(i, EFriendFlags.k_EFriendFlagAll);
+        var friendUser = new SteamUser(this, friendUserId);
+        
+        // Get the relationship type
+        var relationshipType = await GetCurrentUserRelationshipType(friendUser);
+        
+        // Add a new relationship to the list
+        relationships.Add(new Relationship(friendUser, relationshipType));
+      }
+      
+      // Return the relationships
+      return relationships;
+    }
+
+    /// <inheritdoc/>
+    public UniTask<RelationshipType> GetCurrentUserRelationshipType(IUser otherUser)
+    {
+      // Check if the other user is sourced from this social provider
+      if (otherUser is not SteamUser otherSteamUser || otherSteamUser.socialProvider != this)
+        return UniTask.FromResult(RelationshipType.None);
+      
+      // Get the relationship
+      var relationship = SteamFriends.GetFriendRelationship(otherSteamUser.userId);
+      return UniTask.FromResult(relationship switch {
+        EFriendRelationship.k_EFriendRelationshipNone => RelationshipType.None,
+        EFriendRelationship.k_EFriendRelationshipIgnored => RelationshipType.None,
+        EFriendRelationship.k_EFriendRelationshipFriend => RelationshipType.Friend,
+        EFriendRelationship.k_EFriendRelationshipIgnoredFriend => RelationshipType.Friend,
+        EFriendRelationship.k_EFriendRelationshipRequestRecipient => RelationshipType.IncomingFriendRequest,
+        EFriendRelationship.k_EFriendRelationshipRequestInitiator => RelationshipType.OutgoingFriendRequest,
+        EFriendRelationship.k_EFriendRelationshipBlocked => RelationshipType.Blocked,
+        _ => RelationshipType.Unknown,
+      });
     }
     #endregion
 
