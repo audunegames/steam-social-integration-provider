@@ -1,3 +1,4 @@
+using System;
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using Steamworks;
@@ -8,7 +9,7 @@ namespace Audune.Social.Steam
   /// <summary>
   /// Class that defines a user in the Steam social provider.
   /// </summary>
-  public sealed class SteamUser : IUser
+  public sealed class SteamUser : IUser, IEquatable<SteamUser>
   {
     // Internal state
     private readonly SteamSocialProvider _socialProvider;
@@ -63,6 +64,30 @@ namespace Audune.Social.Steam
         };
       }
     }
+    
+    /// <inheritdoc/>
+    public bool isPlaying {
+      get {
+        if (!_socialProvider.isInitialized)
+          return false;
+
+        return SteamFriends.GetFriendGamePlayed(_userId, out _);
+      } 
+    }
+    
+    /// <inheritdoc/>
+    public bool isPlayingThisGame {
+      get {
+        if (!_socialProvider.isInitialized)
+          return false;
+
+        if (socialProvider is not SteamSocialProvider steamSocialProvider)
+          return false;
+
+        return SteamFriends.GetFriendGamePlayed(_userId, out var friendGameInfo)
+          && friendGameInfo.m_gameID == new CGameID(steamSocialProvider.steamApplicationId);
+      } 
+    }
 
 
     /// <summary>
@@ -85,6 +110,63 @@ namespace Audune.Social.Steam
         return null;
 
       return await SteamImageUtils.CreateAvatarTextureFromImage(_userId, cancellationToken);
+    }
+    #endregion
+    
+    #region Equatable implementation
+    /// <inheritdoc/>
+    public override bool Equals(object obj)
+    {
+      return ReferenceEquals(this, obj) 
+        || obj is IUser other && Equals(other);
+    }
+    
+    /// <inheritdoc/>
+    public bool Equals(IUser other)
+    {
+      return ReferenceEquals(this, other) 
+        || other is SteamUser steamUser && Equals(steamUser);
+    }
+    
+    /// <inheritdoc/>
+    public bool Equals(SteamUser other)
+    {
+      if (other is null)
+        return false;
+      if (ReferenceEquals(this, other))
+        return true;
+
+      return Equals(_socialProvider, other._socialProvider)
+        && Equals(_userId, other._userId);
+    }
+
+    /// <inheritdoc/>
+    public override int GetHashCode()
+    {
+      return HashCode.Combine(_socialProvider, _userId);
+    }
+
+    
+    /// <summary>
+    /// Returns if the specified Steam users equal each other.
+    /// </summary>
+    /// <param name="left">The left Steam user to check.</param>
+    /// <param name="right">The right Steam user to check.</param>
+    /// <returns>If the specified Steam users equal each other.</returns>
+    public static bool operator ==(SteamUser left, SteamUser right)
+    {
+      return Equals(left, right);
+    }
+
+    /// <summary>
+    /// Returns if the specified Steam users do not equal each other.
+    /// </summary>
+    /// <param name="left">The left Steam user to check.</param>
+    /// <param name="right">The right Steam user to check.</param>
+    /// <returns>If the specified Steam users do not equal each other.</returns>
+    public static bool operator !=(SteamUser left, SteamUser right)
+    {
+      return !(left == right);
     }
     #endregion
   }
